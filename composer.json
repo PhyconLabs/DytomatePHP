@@ -1,0 +1,8 @@
+{
+    "name": "sds/dytomate-php",
+    "autoload": {
+        "psr-4": {
+            "SDS\\Dytomate\\": "src"
+        }
+    }
+}
