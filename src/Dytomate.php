@@ -2,12 +2,20 @@
 namespace SDS\Dytomate;
 
 use InvalidArgumentException;
+use SDS\Dytomate\Repositories\DataRepository;
+use SDS\Dytomate\Repositories\MySql\MysqlDataRepository;
 
 class Dytomate
 {
     protected $htmlTagBuilder;
 
     protected $dummyDataManager;
+
+    protected $dataRepository;
+
+    protected $defaultData;
+
+    protected $pdo;
 
     protected $isBatching = false;
 
@@ -17,19 +25,17 @@ class Dytomate
 
     protected $attributePlaceholderTemplate = "!{dyto{%s}...{%s}mate}!";
 
-    public function __construct(array $dependencies = [])
-    {
-        if (!isset($dependencies["htmlTagBuilder"])) {
-            $dependencies["htmlTagBuilder"] = $this->dispatchDefaultHtmlTagBuilder();
-        }
-
-        if (!isset($dependencies["dummyDataManager"])) {
-            $dependencies["dummyDataManager"] = $this->dispatchDefaultDummyDataManager();
-        }
-
+    public function __construct(
+        HtmlTagBuilder $htmlTagBuilder,
+        DummyDataManager $dummyDataManager,
+        DataRepository $dataRepository,
+        DefaultData $defaultData
+    ) {
         $this
-            ->setHtmlTagBuilder($dependencies["htmlTagBuilder"])
-            ->setDummyDataManager($dependencies["dummyDataManager"]);
+            ->setHtmlTagBuilder($htmlTagBuilder)
+            ->setDummyDataManager($dummyDataManager)
+            ->setDataRepository($dataRepository)
+            ->setDefaultData($defaultData);
     }
 
     public function startBatching()
@@ -69,7 +75,23 @@ class Dytomate
 
     public function getValue($key, $dummyDataOptions = null)
     {
-        //
+        $data = $this->getDataRepository()->getOneByKey($key);
+
+        if (isset($data)) {
+            return $data->getValue();
+        }
+
+        $defaultData = $this->getDefaultData();
+
+        if ($defaultData->has($key)) {
+            return $defaultData->get($key);
+        }
+
+        if (isset($dummyDataOptions)) {
+            return $this->getDummyDataManager()->generate($dummyDataOptions);
+        }
+
+        return "";
     }
 
     public function getPlaceholder($key, $dummyDataOptions = null)
@@ -127,7 +149,23 @@ class Dytomate
 
     public function getAttributeValue($key, $attribute, $dummyDataOptions = null)
     {
-        //
+        $data = $this->getDataRepository()->getOneByKey($key);
+
+        if (isset($data) && $data->hasAttribute($attribute)) {
+            return $data->getAttribute($attribute);
+        }
+
+        $defaultData = $this->getDefaultData();
+
+        if ($defaultData->hasAttribute($key, $attribute)) {
+            return $defaultData->getAttribute($key, $attribute);
+        }
+
+        if (isset($dummyDataOptions)) {
+            return $this->getDummyDataManager()->generate($dummyDataOptions);
+        }
+
+        return "";
     }
 
     public function getAttributePlaceholder($key, $attribute, $dummyDataOptions = null)
@@ -165,6 +203,30 @@ class Dytomate
     public function setDummyDataManager(DummyDataManager $dummyDataManager)
     {
         $this->dummyDataManager = $dummyDataManager;
+
+        return $this;
+    }
+
+    public function getDataRepository()
+    {
+        return $this->dataRepository;
+    }
+
+    public function setDataRepository(DataRepository $dataRepository)
+    {
+        $this->dataRepository = $dataRepository;
+
+        return $this;
+    }
+
+    public function getDefaultData()
+    {
+        return $this->defaultData;
+    }
+
+    public function setDefaultData(DefaultData $defaultData)
+    {
+        $this->defaultData = $defaultData;
 
         return $this;
     }
@@ -222,15 +284,5 @@ class Dytomate
     public function isBatching()
     {
         return $this->isBatching;
-    }
-
-    protected function dispatchDefaultHtmlTagBuilder()
-    {
-        return new HtmlTagBuilder();
-    }
-
-    protected function dispatchDefaultDummyDataManager()
-    {
-        return new DummyDataManager();
     }
 }
