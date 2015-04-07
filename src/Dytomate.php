@@ -61,7 +61,36 @@ class Dytomate
 
     public function replaceCurrentBatch($content, $clearCurrentBatch = true)
     {
-        //
+        $this->getDataRepository()->getByKeys(array_keys($this->currentBatch));
+
+        $placeholderTemplate = $this->getPlaceholderTemplate();
+        $attributePlaceholderTemplate = $this->getAttributePlaceholderTemplate();
+
+        foreach ($this->currentBatch as $key => $requested) {
+            if (array_key_exists("content", $requested)) {
+                $content = str_replace(
+                    sprintf($placeholderTemplate, $key),
+                    $this->getValue($key, $requested["content"]),
+                    $content
+                );
+            }
+
+            if (isset($requested["attributes"])) {
+                foreach ($requested["attributes"] as $attribute => $dummyDataOptions) {
+                    $content = str_replace(
+                        sprintf($attributePlaceholderTemplate, $key, $attribute),
+                        $this->getAttributeValue($key, $attribute, $dummyDataOptions),
+                        $content
+                    );
+                }
+            }
+        }
+
+        if ($clearCurrentBatch) {
+            $this->clearCurrentBatch();
+        }
+
+        return $content;
     }
 
     public function get($key, $dummyDataOptions = null)
