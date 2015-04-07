@@ -1,5 +1,7 @@
 <?php
-namespace SDS\Dytomate;
+namespace SDS\Dytomate\Repositories;
+
+use SDS\Dytomate\Entities\Data;
 
 interface DataRepository
 {
@@ -8,4 +10,6 @@ interface DataRepository
     public function getByKeys(array $keys);
 
     public function save(Data $data);
+
+    public function ensureExists();
 }
