@@ -11,6 +11,24 @@ class DummyDataManager
 
     protected $tagTypeMap = [];
 
+    public function generate($options)
+    {
+        $type = (is_array($options) && isset($options["type"])) ? $options["type"] : null;
+        $tag = (is_array($options) && isset($options["_tag"])) ? $options["_tag"] : null;
+
+        unset($options["type"]);
+
+        if (!is_array($options)) {
+            $options = [ "_simpleOptions" => $options ];
+        }
+
+        if (!isset($type)) {
+            $type = $this->getTypeForTag($tag);
+        }
+
+        return $this->getService($type)->generate($options);
+    }
+
     public function registerService($type, DummyDataService $service)
     {
         $this->services[$type] = $service;
@@ -44,6 +62,17 @@ class DummyDataManager
         }
 
         return $this;
+    }
+
+    public function getService($type)
+    {
+        if (!$this->hasService($type)) {
+            throw new OutOfBoundsException(
+                "No DummyDataService registered for `{$type}` \$type."
+            );
+        }
+
+        return $this->services[$type];
     }
 
     public function getTypeForTag($tag)
