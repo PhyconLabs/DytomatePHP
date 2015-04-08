@@ -3,8 +3,9 @@ namespace SDS\Dytomate;
 
 use Closure;
 use PDO;
-use SDS\Dytomate\DummyDataServices\LoripsumDummyDataService;
 use SDS\Dytomate\DummyDataServices\LoremPixelDummyDataService;
+use SDS\Dytomate\DummyDataServices\LoripsumDummyDataService;
+use SDS\Dytomate\Helpers\HtmlTagBuilder;
 use SDS\Dytomate\Http\Controller;
 use SDS\Dytomate\Http\Router;
 use SDS\Dytomate\Repositories\DataRepository;

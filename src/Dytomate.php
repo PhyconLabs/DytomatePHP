@@ -2,6 +2,7 @@
 namespace SDS\Dytomate;
 
 use InvalidArgumentException;
+use SDS\Dytomate\Helpers\HtmlTagBuilder;
 use SDS\Dytomate\Http\Router;
 use SDS\Dytomate\Repositories\DataRepository;
 use SDS\Dytomate\Repositories\MySql\MysqlDataRepository;

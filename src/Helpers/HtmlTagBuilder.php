@@ -1,5 +1,5 @@
 <?php
-namespace SDS\Dytomate;
+namespace SDS\Dytomate\Helpers;
 
 class HtmlTagBuilder
 {
