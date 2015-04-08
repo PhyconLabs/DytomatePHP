@@ -2,6 +2,7 @@
 namespace SDS\Dytomate;
 
 use InvalidArgumentException;
+use SDS\Dytomate\Http\Router;
 use SDS\Dytomate\Repositories\DataRepository;
 use SDS\Dytomate\Repositories\MySql\MysqlDataRepository;
 
@@ -15,7 +16,7 @@ class Dytomate
 
     protected $defaultData;
 
-    protected $pdo;
+    protected $router;
 
     protected $isBatching = false;
 
@@ -29,13 +30,15 @@ class Dytomate
         HtmlTagBuilder $htmlTagBuilder,
         DummyDataManager $dummyDataManager,
         DataRepository $dataRepository,
-        DefaultData $defaultData
+        DefaultData $defaultData,
+        Router $router = null
     ) {
         $this
             ->setHtmlTagBuilder($htmlTagBuilder)
             ->setDummyDataManager($dummyDataManager)
             ->setDataRepository($dataRepository)
-            ->setDefaultData($defaultData);
+            ->setDefaultData($defaultData)
+            ->setRouter($router);
     }
 
     public function startBatching()
@@ -256,6 +259,18 @@ class Dytomate
     public function setDefaultData(DefaultData $defaultData)
     {
         $this->defaultData = $defaultData;
+
+        return $this;
+    }
+
+    public function getRouter()
+    {
+        return $this->router;
+    }
+
+    public function setRouter(Router $router = null)
+    {
+        $this->router = $router;
 
         return $this;
     }

@@ -4,7 +4,9 @@ namespace SDS\Dytomate;
 use Closure;
 use PDO;
 use SDS\Dytomate\DummyDataServices\LoripsumDataService;
-use SDS\Dytomate\DummyDataServices\PlacekittenDataService;
+use SDS\Dytomate\DummyDataServices\LoremPixelDataService;
+use SDS\Dytomate\Http\Controller;
+use SDS\Dytomate\Http\Router;
 use SDS\Dytomate\Repositories\DataRepository;
 use SDS\Dytomate\Repositories\MySql\MysqlDataRepository;
 
@@ -12,16 +14,23 @@ class DytomateFactory
 {
     protected static $defaultConfiguration = [
         "enableBatching" => true,
+
+        "enableRouting" => true,
+
         "placeholderTemplate" => "!{dyto{%s}mate}!",
+
         "attributePlaceholderTemplate" => "!{dyto{%s}...{%s}mate}!",
+
         "dummyDataServices" => [
             "text" => LoripsumDataService::class,
-            "image" => PlacekittenDataService::class
+            "image" => LoremPixelDataService::class
         ],
+
         "dummyDataTagMap" => [
             "text" => DummyDataManager::WILDCARD_TAG,
             "image" => "img"
         ],
+
         "pdo" => [
             "dsn" => "mysql:host=localhost;port=3306;dbname=dytomate",
             "user" => "root",
@@ -30,10 +39,24 @@ class DytomateFactory
                 PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
             ]
         ],
+
         "classBindings" => [
             DataRepository::class => MysqlDataRepository::class,
             DefaultData::class => ArrayDefaultData::class
         ],
+
+        "http" => [
+            "scheme" => Router::WILDCARD,
+            "host" => Router::WILDCARD,
+            "basePath" => "/",
+            "savePath" => "/api/dytomate/save",
+            "uploadPath" => "/api/dytomate/upload"
+        ],
+
+        "uploadPath" => __DIR__ . "/../../../../public/uploads",
+
+        "uploadUrl" => "/uploads",
+
         "defaultData" => []
     ];
 
@@ -72,6 +95,14 @@ class DytomateFactory
     {
         $dytomate->setPlaceholderTemplate($this->configuration["placeholderTemplate"]);
         $dytomate->setAttributePlaceholderTemplate($this->configuration["attributePlaceholderTemplate"]);
+
+        if ($this->configuration["enableRouting"]) {
+            $dytomate->setRouter(
+                $this->dispatchRouter(
+                    $dytomate->getDataRepository()
+                )
+            );
+        }
 
         if ($this->configuration["enableBatching"]) {
             $dytomate->startBatching();
@@ -146,6 +177,23 @@ class DytomateFactory
         }
 
         return $defaultData;
+    }
+
+    protected function dispatchRouter(DataRepository $dataRepository)
+    {
+        return new Router(
+            $this->dispatchController($dataRepository),
+            $this->configuration["http"]
+        );
+    }
+
+    protected function dispatchController(DataRepository $dataRepository)
+    {
+        return new Controller(
+            $dataRepository,
+            $this->configuration["uploadPath"],
+            $this->configuration["uploadUrl"]
+        );
     }
 
     protected function dispatchPdo()
