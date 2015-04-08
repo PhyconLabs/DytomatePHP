@@ -3,6 +3,7 @@ namespace SDS\Dytomate;
 
 use Closure;
 use PDO;
+use SDS\Dytomate\DefaultDataServices\ArrayDefaultDataService;
 use SDS\Dytomate\DummyDataServices\LoremPixelDummyDataService;
 use SDS\Dytomate\DummyDataServices\LoripsumDummyDataService;
 use SDS\Dytomate\Helpers\HtmlTagBuilder;
@@ -43,7 +44,7 @@ class DytomateFactory
 
         "classBindings" => [
             DataRepository::class => MysqlDataRepository::class,
-            DefaultData::class => ArrayDefaultData::class
+            DefaultDataService::class => ArrayDefaultDataService::class
         ],
 
         "http" => [
@@ -88,7 +89,7 @@ class DytomateFactory
             $this->dispatchHtmlTagBuilder(),
             $this->dispatchDummyDataManager(),
             $this->dispatchDataRepository(),
-            $this->dispatchDefaultData()
+            $this->dispatchDefaultDataService()
         );
 
         $this->configureDytomate($dytomate);
@@ -118,13 +119,13 @@ class DytomateFactory
         HtmlTagBuilder $htmlTagBuilder,
         DummyDataManager $dummyDataManager,
         DataRepository $dataRepository,
-        DefaultData $defaultData
+        DefaultDataService $defaultDataService
     ) {
         return new Dytomate(
             $htmlTagBuilder,
             $dummyDataManager,
             $dataRepository,
-            $defaultData
+            $defaultDataService
         );
     }
 
@@ -159,9 +160,11 @@ class DytomateFactory
         return $this->dispatchClassBinding($binding);
     }
 
-    protected function dispatchDefaultData()
+    protected function dispatchDefaultDataService()
     {
-        $defaultData = $this->dispatchClassBinding($this->configuration["classBindings"][DefaultData::class]);
+        $defaultDataService = $this->dispatchClassBinding(
+            $this->configuration["classBindings"][DefaultDataService::class]
+        );
 
         foreach ($this->configuration["defaultData"] as $key => $defaults) {
             if (!is_array($defaults)) {
@@ -178,10 +181,10 @@ class DytomateFactory
                 unset($defaults["attributes"]["value"]);
             }
 
-            $defaultData->set($key, $defaults["value"], $defaults["attributes"]);
+            $defaultDataService->set($key, $defaults["value"], $defaults["attributes"]);
         }
 
-        return $defaultData;
+        return $defaultDataService;
     }
 
     protected function dispatchRouter(DataRepository $dataRepository)

@@ -1,7 +1,9 @@
 <?php
-namespace SDS\Dytomate;
+namespace SDS\Dytomate\DefaultDataServices;
 
-class ArrayDefaultData implements DefaultData
+use SDS\Dytomate\DefaultDataService;
+
+class ArrayDefaultDataService implements DefaultDataService
 {
     protected $data;
 

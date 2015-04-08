@@ -1,7 +1,7 @@
 <?php
 namespace SDS\Dytomate;
 
-interface DefaultData
+interface DefaultDataService
 {
     public function get($key);
 

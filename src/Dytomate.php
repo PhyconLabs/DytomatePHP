@@ -15,7 +15,7 @@ class Dytomate
 
     protected $dataRepository;
 
-    protected $defaultData;
+    protected $defaultDataService;
 
     protected $router;
 
@@ -31,14 +31,14 @@ class Dytomate
         HtmlTagBuilder $htmlTagBuilder,
         DummyDataManager $dummyDataManager,
         DataRepository $dataRepository,
-        DefaultData $defaultData,
+        DefaultDataService $defaultDataService,
         Router $router = null
     ) {
         $this
             ->setHtmlTagBuilder($htmlTagBuilder)
             ->setDummyDataManager($dummyDataManager)
             ->setDataRepository($dataRepository)
-            ->setDefaultData($defaultData)
+            ->setDefaultDataService($defaultDataService)
             ->setRouter($router);
     }
 
@@ -114,10 +114,10 @@ class Dytomate
             return $data->getValue();
         }
 
-        $defaultData = $this->getDefaultData();
+        $defaultDataService = $this->getDefaultDataService();
 
-        if ($defaultData->has($key)) {
-            return $defaultData->get($key);
+        if ($defaultDataService->has($key)) {
+            return $defaultDataService->get($key);
         }
 
         if (isset($dummyDataOptions)) {
@@ -188,10 +188,10 @@ class Dytomate
             return $data->getAttribute($attribute);
         }
 
-        $defaultData = $this->getDefaultData();
+        $defaultDataService = $this->getDefaultDataService();
 
-        if ($defaultData->hasAttribute($key, $attribute)) {
-            return $defaultData->getAttribute($key, $attribute);
+        if ($defaultDataService->hasAttribute($key, $attribute)) {
+            return $defaultDataService->getAttribute($key, $attribute);
         }
 
         if (isset($dummyDataOptions)) {
@@ -252,14 +252,14 @@ class Dytomate
         return $this;
     }
 
-    public function getDefaultData()
+    public function getDefaultDataService()
     {
         return $this->defaultData;
     }
 
-    public function setDefaultData(DefaultData $defaultData)
+    public function setDefaultDataService(DefaultDataService $defaultDataService)
     {
-        $this->defaultData = $defaultData;
+        $this->defaultData = $defaultDataService;
 
         return $this;
     }
