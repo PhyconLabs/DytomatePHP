@@ -3,16 +3,13 @@ namespace SDS\Dytomate\DummyDataServices;
 
 use SDS\Dytomate\DummyDataService;
 
-class LoremPixelDataService implements DummyDataService
+class PlacekittenDummyDataService implements DummyDataService
 {
     public function __construct()
     {
         $this->defaultOptions = [
             "size" => "500",
-            "grayscale" => false,
-            "category" => false,
-            "number" => false,
-            "text" => false
+            "grayscale" => false
         ];
     }
 
@@ -28,11 +25,8 @@ class LoremPixelDataService implements DummyDataService
         $width = isset($options["width"]) ? $options["width"] : $options["size"];
         $height = isset($options["height"]) ? $options["height"] : $options["size"];
         $grayscale = $options["grayscale"] ? "/g" : "";
-        $category = $options["category"] ? "/{$options['category']}" : "";
-        $number = $options["number"] ? "/{$options['number']}" : "";
-        $text = $options["text"] ? "/{$options['text']}" : "";
 
-        return "http://lorempixel.com{$grayscale}/{$width}/{$height}{$category}{$number}{$text}";
+        return "http://placekitten.com{$grayscale}/{$width}/{$height}";
     }
 
     public function mergeDefaultOptions(array $options)

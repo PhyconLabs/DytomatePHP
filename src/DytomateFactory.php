@@ -3,8 +3,8 @@ namespace SDS\Dytomate;
 
 use Closure;
 use PDO;
-use SDS\Dytomate\DummyDataServices\LoripsumDataService;
-use SDS\Dytomate\DummyDataServices\LoremPixelDataService;
+use SDS\Dytomate\DummyDataServices\LoripsumDummyDataService;
+use SDS\Dytomate\DummyDataServices\LoremPixelDummyDataService;
 use SDS\Dytomate\Http\Controller;
 use SDS\Dytomate\Http\Router;
 use SDS\Dytomate\Repositories\DataRepository;
@@ -22,8 +22,8 @@ class DytomateFactory
         "attributePlaceholderTemplate" => "!{dyto{%s}...{%s}mate}!",
 
         "dummyDataServices" => [
-            "text" => LoripsumDataService::class,
-            "image" => LoremPixelDataService::class
+            "text" => LoripsumDummyDataService::class,
+            "image" => LoremPixelDummyDataService::class
         ],
 
         "dummyDataTagMap" => [

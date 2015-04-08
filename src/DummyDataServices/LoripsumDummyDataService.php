@@ -3,7 +3,7 @@ namespace SDS\Dytomate\DummyDataServices;
 
 use SDS\Dytomate\DummyDataService;
 
-class LoripsumDataService implements DummyDataService
+class LoripsumDummyDataService implements DummyDataService
 {
     public function __construct()
     {
