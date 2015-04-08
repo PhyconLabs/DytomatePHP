@@ -1,6 +1,7 @@
 <?php
 namespace SDS\Dytomate\Http;
 
+use Closure;
 use SDS\Dytomate\Entities\Data;
 use SDS\Dytomate\Helpers\Image;
 use SDS\Dytomate\Repositories\DataRepository;
@@ -8,14 +9,27 @@ use SDS\Dytomate\Repositories\DataRepository;
 class Controller
 {
     protected $dataRepository;
+
     protected $uploadPath;
+
     protected $uploadUrl;
 
-    public function __construct(DataRepository $dataRepository, $uploadPath, $uploadUrl)
-    {
+    protected $preSaveCallback;
+
+    protected $postSaveCallback;
+
+    public function __construct(
+        DataRepository $dataRepository,
+        $uploadPath,
+        $uploadUrl,
+        Closure $preSaveCallback = null,
+        Closure $postSaveCallback = null
+    ) {
         $this->dataRepository = $dataRepository;
         $this->uploadPath = $uploadPath;
         $this->uploadUrl = rtrim($uploadUrl, "/");
+        $this->preSaveCallback = $preSaveCallback;
+        $this->postSaveCallback = $postSaveCallback;
     }
 
     public function save($key, $value, array $attributes = [])
@@ -30,7 +44,17 @@ class Controller
             ->setValue($value)
             ->setAttributes($attributes);
 
+        if ($this->preSaveCallback) {
+            $c = $this->preSaveCallback;
+            $c($data);
+        }
+
         $this->dataRepository->save($data);
+
+        if ($this->postSaveCallback) {
+            $c = $this->postSaveCallback;
+            $c($data);
+        }
 
         // header("Content-Type: application/json");
 

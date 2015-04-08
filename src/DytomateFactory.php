@@ -57,6 +57,10 @@ class DytomateFactory
 
         "uploadUrl" => "/uploads",
 
+        "preSaveCallback" => null,
+
+        "postSaveCallback" => null,
+
         "defaultData" => []
     ];
 
@@ -192,7 +196,9 @@ class DytomateFactory
         return new Controller(
             $dataRepository,
             $this->configuration["uploadPath"],
-            $this->configuration["uploadUrl"]
+            $this->configuration["uploadUrl"],
+            $this->configuration["preSaveCallback"],
+            $this->configuration["postSaveCallback"]
         );
     }
 
