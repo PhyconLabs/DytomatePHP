@@ -1,6 +1,8 @@
 {
     "name": "sds/dytomate-php",
 
+    "license": "MIT",
+
     "autoload": {
         "psr-4": {
             "SDS\\Dytomate\\": "src"
