@@ -17,9 +17,7 @@ class Router
 
     protected $uploadPath;
 
-    protected $saveMethod;
-
-    protected $uploadMethod;
+    protected $basicAuthPath;
 
     public function __construct(Controller $controller, array $options = [])
     {
@@ -29,6 +27,8 @@ class Router
         $this->basePath = isset($options["basePath"]) ? $options["basePath"] : "/";
         $this->savePath = isset($options["savePath"]) ? $options["savePath"] : "/api/dytoamte/save";
         $this->uploadPath = isset($options["uploadPath"]) ? $options["uploadPath"] : "/api/dytoamte/upload";
+        $this->basicAuthPath = isset($options["basicAuthPath"]) ? $options["basicAuthPath"] : null;
+
 
         if (!is_array($this->schemes)) {
             $this->schemes = [ $this->schemes ];
@@ -56,14 +56,15 @@ class Router
             return false;
         }
 
-        if ($method !== "POST") {
-            return false;
-        }
-
         $savePath = (empty($this->basePath) ? "" : "/{$this->basePath}") . $this->savePath;
         $uploadPath = (empty($this->basePath) ? "" : "/{$this->basePath}") . $this->uploadPath;
+        $basicAuthPath = null;
 
-        if ($path === $savePath && isset($_POST["key"]) && isset($_POST["value"])) {
+        if (isset($this->basicAuthPath)) {
+            $basicAuthPath = (empty($this->basePath) ? "" : "/{$this->basePath}") . $this->basicAuthPath;
+        }
+
+        if ($method === "POST" && $path === $savePath && isset($_POST["key"], $_POST["value"])) {
             $attributes = isset($_POST["attributes"]) ? $_POST["attributes"] : [];
 
             $this->controller->save($_POST["key"], $_POST["value"], $attributes);
@@ -71,7 +72,7 @@ class Router
             return true;
         }
 
-        if ($path === $uploadPath && isset($_POST["key"]) && isset($_POST["value"]["name"], $_POST["value"]["blob"])) {
+        if ($method === "POST" && $path === $uploadPath && isset($_POST["key"], $_POST["value"]["name"], $_POST["value"]["blob"])) {
             $attributes = isset($_POST["attributes"]) ? $_POST["attributes"] : [];
 
             $this->controller->upload(
@@ -80,6 +81,12 @@ class Router
                 $_POST["value"]["blob"],
                 $attributes
             );
+
+            return true;
+        }
+
+        if (isset($basicAuthPath) && $method === "GET" && $path === $basicAuthPath) {
+            $this->controller->basicAuth();
 
             return true;
         }

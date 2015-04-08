@@ -17,6 +17,8 @@ class Dytomate
 
     protected $defaultDataService;
 
+    protected $firewall;
+
     protected $router;
 
     protected $isBatching = false;
@@ -32,6 +34,7 @@ class Dytomate
         DummyDataManager $dummyDataManager,
         DataRepository $dataRepository,
         DefaultDataService $defaultDataService,
+        Firewall $firewall,
         Router $router = null
     ) {
         $this
@@ -39,6 +42,7 @@ class Dytomate
             ->setDummyDataManager($dummyDataManager)
             ->setDataRepository($dataRepository)
             ->setDefaultDataService($defaultDataService)
+            ->setFirewall($firewall)
             ->setRouter($router);
     }
 
@@ -140,7 +144,9 @@ class Dytomate
 
     public function getTag($key, $tag, array $attributes = [], $dummyDataOptions = null)
     {
-        $attributes["data-dytomate"] = $key;
+        if ($this->getFirewall()->isAccessAllowed()) {
+            $attributes["data-dytomate"] = $key;
+        }
 
         if (isset($dummyDataOptions) && (!is_array($dummyDataOptions) || !isset($dummyDataOptions["type"]))) {
             if (!is_array($dummyDataOptions)) {
@@ -166,7 +172,9 @@ class Dytomate
 
     public function getReadOnlyTag($key, $tag, array $attributes = [], $dummyDataOptions = null)
     {
-        $attributes["data-dytomate-ro"] = "true";
+        if ($this->getFirewall()->isAccessAllowed()) {
+            $attributes["data-dytomate-ro"] = "true";
+        }
 
         return $this->getTag($key, $tag, $attributes);
     }
@@ -260,6 +268,18 @@ class Dytomate
     public function setDefaultDataService(DefaultDataService $defaultDataService)
     {
         $this->defaultData = $defaultDataService;
+
+        return $this;
+    }
+
+    public function getFirewall()
+    {
+        return $this->firewall;
+    }
+
+    public function setFirewall(Firewall $firewall)
+    {
+        $this->firewall = $firewall;
 
         return $this;
     }

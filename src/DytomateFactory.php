@@ -6,6 +6,8 @@ use PDO;
 use SDS\Dytomate\DefaultDataServices\ArrayDefaultDataService;
 use SDS\Dytomate\DummyDataServices\LoremPixelDummyDataService;
 use SDS\Dytomate\DummyDataServices\LoripsumDummyDataService;
+use SDS\Dytomate\Firewalls\BasicAuthFirewall;
+use SDS\Dytomate\Firewalls\ClosureFirewall;
 use SDS\Dytomate\Helpers\HtmlTagBuilder;
 use SDS\Dytomate\Http\Controller;
 use SDS\Dytomate\Http\Router;
@@ -44,7 +46,8 @@ class DytomateFactory
 
         "classBindings" => [
             DataRepository::class => MysqlDataRepository::class,
-            DefaultDataService::class => ArrayDefaultDataService::class
+            DefaultDataService::class => ArrayDefaultDataService::class,
+            Firewall::class => ClosureFirewall::class
         ],
 
         "http" => [
@@ -54,6 +57,15 @@ class DytomateFactory
             "savePath" => "/api/dytomate/save",
             "uploadPath" => "/api/dytomate/upload"
         ],
+
+        "basicAuth" => [
+            "enabled" => false,
+            "username" => "admin",
+            "password" => "secret",
+            "path" => "/dytomate/login"
+        ],
+
+        "isAccessAllowedCallback" => null,
 
         "uploadPath" => __DIR__ . "/../../../../public/uploads",
 
@@ -89,7 +101,8 @@ class DytomateFactory
             $this->dispatchHtmlTagBuilder(),
             $this->dispatchDummyDataManager(),
             $this->dispatchDataRepository(),
-            $this->dispatchDefaultDataService()
+            $this->dispatchDefaultDataService(),
+            $this->dispatchFirewall()
         );
 
         $this->configureDytomate($dytomate);
@@ -105,7 +118,8 @@ class DytomateFactory
         if ($this->configuration["enableRouting"]) {
             $dytomate->setRouter(
                 $this->dispatchRouter(
-                    $dytomate->getDataRepository()
+                    $dytomate->getDataRepository(),
+                    $dytomate->getFirewall()
                 )
             );
         }
@@ -119,13 +133,15 @@ class DytomateFactory
         HtmlTagBuilder $htmlTagBuilder,
         DummyDataManager $dummyDataManager,
         DataRepository $dataRepository,
-        DefaultDataService $defaultDataService
+        DefaultDataService $defaultDataService,
+        Firewall $firewall
     ) {
         return new Dytomate(
             $htmlTagBuilder,
             $dummyDataManager,
             $dataRepository,
-            $defaultDataService
+            $defaultDataService,
+            $firewall
         );
     }
 
@@ -187,18 +203,53 @@ class DytomateFactory
         return $defaultDataService;
     }
 
-    protected function dispatchRouter(DataRepository $dataRepository)
+    protected function dispatchFirewall()
     {
+        if ($this->configuration["basicAuth"]["enabled"]) {
+            $this->configuration["classBindings"][Firewall::class] = BasicAuthFirewall::class;
+        }
+
+        $binding = $this->configuration["classBindings"][Firewall::class];
+
+        if ($binding === BasicAuthFirewall::class) {
+            return new BasicAuthFirewall(
+                $this->configuration["basicAuth"]["username"],
+                $this->configuration["basicAuth"]["password"]
+            );
+        } elseif ($binding === ClosureFirewall::class) {
+            if (!isset($this->configuration["isAccessAllowedCallback"])) {
+                $this->configuration["isAccessAllowedCallback"] = function() {
+                    return false;
+                };
+            }
+
+            return new ClosureFirewall($this->configuration["isAccessAllowedCallback"]);
+        }
+
+        return $this->dispatchClassBinding($binding);
+    }
+
+    protected function dispatchRouter(DataRepository $dataRepository, Firewall $firewall)
+    {
+        $httpOptions = $this->configuration["http"];
+
+        if ($firewall instanceof BasicAuthFirewall) {
+            $httpOptions = array_merge($httpOptions, [
+                "basicAuthPath" => $this->configuration["basicAuth"]["path"]
+            ]);
+        }
+
         return new Router(
-            $this->dispatchController($dataRepository),
-            $this->configuration["http"]
+            $this->dispatchController($dataRepository, $firewall),
+            $httpOptions
         );
     }
 
-    protected function dispatchController(DataRepository $dataRepository)
+    protected function dispatchController(DataRepository $dataRepository, Firewall $firewall)
     {
         return new Controller(
             $dataRepository,
+            $firewall,
             $this->configuration["uploadPath"],
             $this->configuration["uploadUrl"],
             $this->configuration["preSaveCallback"],
