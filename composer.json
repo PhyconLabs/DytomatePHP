@@ -1,8 +1,13 @@
 {
     "name": "sds/dytomate-php",
+
     "autoload": {
         "psr-4": {
             "SDS\\Dytomate\\": "src"
         }
+    },
+
+    "require": {
+        "php": ">=5.6.0"
     }
 }
