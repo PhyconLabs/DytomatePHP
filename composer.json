@@ -11,5 +11,13 @@
 
     "require": {
         "php": ">=5.6.0"
+    },
+
+    "require-dev": {
+        "classpreloader/classpreloader": "1.2.*"
+    },
+
+    "config": {
+        "bin-dir": "bin"
     }
 }
