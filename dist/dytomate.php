@@ -658,6 +658,9 @@ class Dytomate
             return $defaultDataService->get($key);
         }
         if (isset($dummyDataOptions)) {
+            if (is_string($dummyDataOptions)) {
+                return $dummyDataOptions;
+            }
             return $this->getDummyDataManager()->generate($dummyDataOptions);
         }
         return '';
@@ -675,7 +678,7 @@ class Dytomate
         if ($this->getFirewall()->isAccessAllowed()) {
             $attributes['data-dytomate'] = $key;
         }
-        if (isset($dummyDataOptions) && (!is_array($dummyDataOptions) || !isset($dummyDataOptions['type']))) {
+        if (isset($dummyDataOptions) && !is_string($dummyDataOptions) && (!is_array($dummyDataOptions) || !isset($dummyDataOptions['type']))) {
             if (!is_array($dummyDataOptions)) {
                 $dummyDataOptions = array('_simpleOptions' => $dummyDataOptions);
             }
@@ -839,7 +842,7 @@ use SDS\Dytomate\Repositories\DataRepository;
 use SDS\Dytomate\Repositories\MySql\MysqlDataRepository;
 class DytomateFactory
 {
-    protected static $defaultConfiguration = array('enableBatching' => true, 'enableRouting' => true, 'placeholderTemplate' => '!{dyto{%s}mate}!', 'attributePlaceholderTemplate' => '!{dyto{%s}...{%s}mate}!', 'dummyDataServices' => array('text' => LoripsumDummyDataService::class, 'image' => LoremPixelDummyDataService::class), 'dummyDataTagMap' => array('text' => DummyDataManager::WILDCARD_TAG, 'image' => 'img'), 'pdo' => array('dsn' => 'mysql:host=localhost;port=3306;dbname=dytomate', 'user' => 'root', 'password' => '', 'driverOptions' => array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8')), 'classBindings' => array(DataRepository::class => MysqlDataRepository::class, DefaultDataService::class => ArrayDefaultDataService::class, Firewall::class => ClosureFirewall::class), 'http' => array('scheme' => Router::WILDCARD, 'host' => Router::WILDCARD, 'basePath' => '/', 'savePath' => '/api/dytomate/save', 'uploadPath' => '/api/dytomate/upload'), 'basicAuth' => array('enabled' => false, 'username' => 'admin', 'password' => 'secret', 'path' => '/dytomate/login'), 'isAccessAllowedCallback' => null, 'uploadPath' => __DIR__ . '/../../../../public/uploads', 'uploadUrl' => '/uploads', 'preSaveCallback' => null, 'postSaveCallback' => null, 'defaultData' => array());
+    protected static $defaultConfiguration = array('enableBatching' => false, 'enableRouting' => true, 'placeholderTemplate' => '!{dyto{%s}mate}!', 'attributePlaceholderTemplate' => '!{dyto{%s}...{%s}mate}!', 'dummyDataServices' => array('text' => LoripsumDummyDataService::class, 'image' => LoremPixelDummyDataService::class), 'dummyDataTagMap' => array('text' => DummyDataManager::WILDCARD_TAG, 'image' => 'img'), 'pdo' => array('dsn' => 'mysql:host=localhost;port=3306;dbname=dytomate', 'user' => 'root', 'password' => '', 'driverOptions' => array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8')), 'classBindings' => array(DataRepository::class => MysqlDataRepository::class, DefaultDataService::class => ArrayDefaultDataService::class, Firewall::class => ClosureFirewall::class), 'http' => array('scheme' => Router::WILDCARD, 'host' => Router::WILDCARD, 'basePath' => '/', 'savePath' => '/api/dytomate/save', 'uploadPath' => '/api/dytomate/upload'), 'basicAuth' => array('enabled' => false, 'username' => 'admin', 'password' => 'secret', 'path' => '/dytomate/login'), 'isAccessAllowedCallback' => null, 'uploadPath' => __DIR__ . '/../../../../public/uploads', 'uploadUrl' => '/uploads', 'preSaveCallback' => null, 'postSaveCallback' => null, 'defaultData' => array());
     protected $configuration;
     public static function setDefaultConfiguration(array $configuration)
     {

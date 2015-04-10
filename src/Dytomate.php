@@ -125,6 +125,10 @@ class Dytomate
         }
 
         if (isset($dummyDataOptions)) {
+            if (is_string($dummyDataOptions)) {
+                return $dummyDataOptions;
+            }
+
             return $this->getDummyDataManager()->generate($dummyDataOptions);
         }
 
@@ -148,7 +152,7 @@ class Dytomate
             $attributes["data-dytomate"] = $key;
         }
 
-        if (isset($dummyDataOptions) && (!is_array($dummyDataOptions) || !isset($dummyDataOptions["type"]))) {
+        if (isset($dummyDataOptions) && !is_string($dummyDataOptions) && (!is_array($dummyDataOptions) || !isset($dummyDataOptions["type"]))) {
             if (!is_array($dummyDataOptions)) {
                 $dummyDataOptions = [ "_simpleOptions" => $dummyDataOptions ];
             }

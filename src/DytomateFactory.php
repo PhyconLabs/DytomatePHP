@@ -17,7 +17,7 @@ use SDS\Dytomate\Repositories\MySql\MysqlDataRepository;
 class DytomateFactory
 {
     protected static $defaultConfiguration = [
-        "enableBatching" => true,
+        "enableBatching" => false,
 
         "enableRouting" => true,
 
