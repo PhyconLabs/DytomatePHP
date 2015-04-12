@@ -67,7 +67,7 @@ class DytomateFactory
 
         "isAccessAllowedCallback" => null,
 
-        "uploadPath" => __DIR__ . "/../../../../public/uploads",
+        "uploadPath" => "../../../../public/uploads",
 
         "uploadUrl" => "/uploads",
 
