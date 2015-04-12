@@ -14,6 +14,8 @@ class MySqlDataRepository implements DataRepository
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
+
+        $this->ensureExists();
     }
 
     public function getOneByKey($key)
