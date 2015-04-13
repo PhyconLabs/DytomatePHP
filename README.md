@@ -1,3 +1,5 @@
 # Dytomate PHP Backend
 
-Dytomate backend written in PHP.
+[Dytomate](http://dytomate.com/) backend written in PHP.
+
+[Learn how easy it is to set it up](http://dytomate.com/getting-started).
